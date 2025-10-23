@@ -5,6 +5,8 @@ import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
 import '../widgets/movie_list_widget.dart';
 import '../widgets/movie_card_widget.dart';
+import '../../../movie_details/presentation/pages/movie_details_page.dart';
+import '../../domain/entities/movie.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -37,6 +39,14 @@ class _HomePageState extends State<HomePage> {
         _scrollController.position.maxScrollExtent * 0.8) {
       context.read<HomeBloc>().add(const LoadMoreMovies(category: 'popular'));
     }
+  }
+
+  void _navigateToMovieDetails(Movie movie) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MovieDetailsPage(movie: movie),
+      ),
+    );
   }
 
   @override
@@ -103,9 +113,7 @@ class _HomePageState extends State<HomePage> {
                   MovieListWidget(
                     title: 'Popular Movies',
                     movies: state.popularMovies,
-                    onMovieTap: (movie) {
-                      // Navigate to movie details
-                    },
+                    onMovieTap: _navigateToMovieDetails,
                     onLoadMore: state.hasReachedMaxPopular
                         ? null
                         : () {
@@ -121,9 +129,7 @@ class _HomePageState extends State<HomePage> {
                   MovieListWidget(
                     title: 'Top Rated Movies',
                     movies: state.topRatedMovies,
-                    onMovieTap: (movie) {
-                      // Navigate to movie details
-                    },
+                    onMovieTap: _navigateToMovieDetails,
                     onLoadMore: state.hasReachedMaxTopRated
                         ? null
                         : () {
