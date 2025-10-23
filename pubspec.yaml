@@ -75,6 +75,9 @@ dependencies:
   # UI Components
   shimmer: ^3.0.0
   lottie: ^3.1.2
+  
+  # External Links
+  url_launcher: ^6.2.2
 
 dev_dependencies:
   flutter_test:

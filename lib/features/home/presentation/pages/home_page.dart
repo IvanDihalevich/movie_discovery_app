@@ -6,6 +6,8 @@ import '../bloc/home_state.dart';
 import '../widgets/movie_list_widget.dart';
 import '../widgets/movie_card_widget.dart';
 import '../../../movie_details/presentation/pages/movie_details_page.dart';
+import '../../../favorites/presentation/pages/favorites_page.dart';
+import '../../../search/presentation/pages/search_page.dart';
 import '../../domain/entities/movie.dart';
 
 class HomePage extends StatefulWidget {
@@ -49,6 +51,22 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _showSearchDialog(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const SearchPage(),
+      ),
+    );
+  }
+
+  void _navigateToFavorites(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const FavoritesPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,7 +78,13 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // Navigate to search page
+              _showSearchDialog(context);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.favorite),
+            onPressed: () {
+              _navigateToFavorites(context);
             },
           ),
         ],

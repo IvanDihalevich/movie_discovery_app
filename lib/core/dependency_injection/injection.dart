@@ -28,6 +28,9 @@ Future<void> initializeDependencies() async {
   getIt.registerLazySingleton<MovieRemoteDataSource>(
     () => MovieRemoteDataSourceImpl(dio: getIt<Dio>()),
   );
+  getIt.registerLazySingleton<MovieRemoteDataSourceImpl>(
+    () => MovieRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
   getIt.registerLazySingleton<MovieLocalDataSource>(
     () => MovieLocalDataSourceImpl(hive: getIt<HiveInterface>()),
   );

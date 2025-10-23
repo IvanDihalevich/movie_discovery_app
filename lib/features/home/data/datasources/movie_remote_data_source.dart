@@ -11,6 +11,8 @@ abstract class MovieRemoteDataSource {
   Future<Movie> getMovieDetails(int movieId);
   Future<List<Movie>> searchMovies(String query, {int page = 1});
   Future<List<Movie>> getMoviesByGenre(int genreId, {int page = 1});
+  Future<List<Map<String, dynamic>>> getMovieVideos(int movieId);
+  Future<List<Map<String, dynamic>>> getMovieReviews(int movieId, {int page = 1});
 }
 
 class MovieRemoteDataSourceImpl implements MovieRemoteDataSource {
@@ -137,6 +139,40 @@ class MovieRemoteDataSourceImpl implements MovieRemoteDataSource {
         return moviesJson.map((json) => Movie.fromJson(json)).toList();
       } else {
         throw ServerException(message: 'Failed to load movies by genre');
+      }
+    } on DioException catch (e) {
+      throw _handleDioException(e);
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getMovieVideos(int movieId) async {
+    try {
+      final response = await dio.get('/movie/$movieId/videos');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> videosJson = response.data['results'];
+        return videosJson.cast<Map<String, dynamic>>();
+      } else {
+        throw ServerException(message: 'Failed to load movie videos');
+      }
+    } on DioException catch (e) {
+      throw _handleDioException(e);
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getMovieReviews(int movieId, {int page = 1}) async {
+    try {
+      final response = await dio.get('/movie/$movieId/reviews', queryParameters: {
+        'page': page,
+      });
+
+      if (response.statusCode == 200) {
+        final List<dynamic> reviewsJson = response.data['results'];
+        return reviewsJson.cast<Map<String, dynamic>>();
+      } else {
+        throw ServerException(message: 'Failed to load movie reviews');
       }
     } on DioException catch (e) {
       throw _handleDioException(e);
