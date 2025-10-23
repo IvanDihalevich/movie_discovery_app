@@ -1,0 +1,31 @@
+# GitHub Repository Setup Commands for IvanDihalevich/movie_discovery_app
+# Copy and paste these commands one by one after installing Git
+
+# 1. Initialize Git repository
+git init
+
+# 2. Add all files to Git
+git add .
+
+# 3. Make initial commit
+git commit -m "Initial commit: Movie Discovery App with Clean Architecture"
+
+# 4. Add GitHub repository as remote origin
+git remote add origin https://github.com/IvanDihalevich/movie_discovery_app.git
+
+# 5. Rename branch to main (if needed)
+git branch -M main
+
+# 6. Push to GitHub
+git push -u origin main
+
+# After pushing, you can verify by visiting:
+# https://github.com/IvanDihalevich/movie_discovery_app
+
+# Alternative: If you want to use SSH instead of HTTPS
+# git remote add origin git@github.com:IvanDihalevich/movie_discovery_app.git
+
+# Daily workflow commands:
+# git add .
+# git commit -m "Your commit message"
+# git push
