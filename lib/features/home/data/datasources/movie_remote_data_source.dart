@@ -9,7 +9,7 @@ abstract class MovieRemoteDataSource {
   Future<List<Movie>> getNowPlayingMovies({int page = 1});
   Future<List<Movie>> getUpcomingMovies({int page = 1});
   Future<Movie> getMovieDetails(int movieId);
-  Future<List<Movie>> searchMovies(String query, {int page = 1});
+  Future<List<Movie>> searchMovies(String query, {int page = 1, int? year, double? rating, List<int>? genres});
   Future<List<Movie>> getMoviesByGenre(int genreId, {int page = 1});
   Future<List<Map<String, dynamic>>> getMovieVideos(int movieId);
   Future<List<Map<String, dynamic>>> getMovieReviews(int movieId, {int page = 1});
@@ -108,12 +108,25 @@ class MovieRemoteDataSourceImpl implements MovieRemoteDataSource {
   }
 
   @override
-  Future<List<Movie>> searchMovies(String query, {int page = 1}) async {
+  Future<List<Movie>> searchMovies(String query, {int page = 1, int? year, double? rating, List<int>? genres}) async {
     try {
-      final response = await dio.get('/search/movie', queryParameters: {
+      final queryParams = <String, dynamic>{
         'query': query,
         'page': page,
-      });
+      };
+
+      // Add optional filters
+      if (year != null) {
+        queryParams['year'] = year;
+      }
+      if (rating != null) {
+        queryParams['vote_average.gte'] = rating;
+      }
+      if (genres != null && genres.isNotEmpty) {
+        queryParams['with_genres'] = genres.join(',');
+      }
+
+      final response = await dio.get('/search/movie', queryParameters: queryParams);
 
       if (response.statusCode == 200) {
         final List<dynamic> moviesJson = response.data['results'];

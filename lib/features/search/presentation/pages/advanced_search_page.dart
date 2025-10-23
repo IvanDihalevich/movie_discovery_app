@@ -5,29 +5,60 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../movie_details/presentation/pages/movie_details_page.dart';
 import '../../../../core/dependency_injection/injection.dart';
 import '../../../home/data/datasources/movie_remote_data_source.dart';
-import 'advanced_search_page.dart';
 
-class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+class AdvancedSearchPage extends StatefulWidget {
+  const AdvancedSearchPage({super.key});
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
+  State<AdvancedSearchPage> createState() => _AdvancedSearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _AdvancedSearchPageState extends State<AdvancedSearchPage> {
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _yearController = TextEditingController();
+  final TextEditingController _ratingController = TextEditingController();
+  
   List<Movie> searchResults = [];
+  List<String> selectedGenres = [];
   bool isLoading = false;
   String? errorMessage;
+  
+  // Popular genres
+  final Map<String, int> genres = {
+    'Action': 28,
+    'Adventure': 12,
+    'Animation': 16,
+    'Comedy': 35,
+    'Crime': 80,
+    'Documentary': 99,
+    'Drama': 18,
+    'Family': 10751,
+    'Fantasy': 14,
+    'History': 36,
+    'Horror': 27,
+    'Music': 10402,
+    'Mystery': 9648,
+    'Romance': 10749,
+    'Science Fiction': 878,
+    'TV Movie': 10770,
+    'Thriller': 53,
+    'War': 10752,
+    'Western': 37,
+  };
 
   @override
   void dispose() {
     _searchController.dispose();
+    _yearController.dispose();
+    _ratingController.dispose();
     super.dispose();
   }
 
-  Future<void> _performSearch(String query) async {
-    if (query.trim().isEmpty) return;
+  Future<void> _performSearch() async {
+    // Allow search even with empty query for genre-only searches
+    final query = _searchController.text.trim().isNotEmpty 
+        ? _searchController.text.trim() 
+        : 'movie'; // Default query for genre-only searches
 
     setState(() {
       isLoading = true;
@@ -36,7 +67,12 @@ class _SearchPageState extends State<SearchPage> {
 
     try {
       final remoteDataSource = getIt<MovieRemoteDataSourceImpl>();
-      final results = await remoteDataSource.searchMovies(query.trim());
+      final results = await remoteDataSource.searchMovies(
+        query,
+        year: _yearController.text.trim().isNotEmpty ? int.tryParse(_yearController.text.trim()) : null,
+        rating: _ratingController.text.trim().isNotEmpty ? double.tryParse(_ratingController.text.trim()) : null,
+        genres: selectedGenres.isNotEmpty ? selectedGenres.map((g) => genres[g]!).toList() : null,
+      );
       
       setState(() {
         searchResults = results;
@@ -58,42 +94,127 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
+  void _toggleGenre(String genre) {
+    setState(() {
+      if (selectedGenres.contains(genre)) {
+        selectedGenres.remove(genre);
+      } else {
+        selectedGenres.add(genre);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search Movies'),
+        title: const Text('Advanced Search'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const AdvancedSearchPage(),
-                ),
-              );
-            },
-            tooltip: 'Advanced Search',
-          ),
-        ],
       ),
       body: Column(
         children: [
-          // Search bar
-          Padding(
+          // Search filters
+          Container(
             padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Enter movie title...',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () => _performSearch(_searchController.text),
-                ),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              border: Border(
+                bottom: BorderSide(color: Colors.grey[300]!),
               ),
-              onSubmitted: _performSearch,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title search
+                TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter movie title... (optional)',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.search),
+                    helperText: 'Leave empty to search by filters only',
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Year and rating
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _yearController,
+                        decoration: const InputDecoration(
+                          hintText: 'Year (optional)',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.calendar_today),
+                          helperText: 'e.g., 2023',
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextField(
+                        controller: _ratingController,
+                        decoration: const InputDecoration(
+                          hintText: 'Min rating (optional)',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.star),
+                          helperText: '1-10',
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Genres
+                Text(
+                  'Genres (optional):',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: genres.keys.map((genre) {
+                    final isSelected = selectedGenres.contains(genre);
+                    return FilterChip(
+                      label: Text(genre),
+                      selected: isSelected,
+                      onSelected: (_) => _toggleGenre(genre),
+                      selectedColor: Colors.blue[100],
+                      checkmarkColor: Colors.blue[800],
+                    );
+                  }).toList(),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Search button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: isLoading ? null : _performSearch,
+                    icon: isLoading 
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.search),
+                    label: Text(isLoading ? 'Searching...' : 'Search Movies'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           
@@ -131,7 +252,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => _performSearch(_searchController.text),
+              onPressed: _performSearch,
               child: const Text('Retry'),
             ),
           ],
@@ -156,7 +277,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
             SizedBox(height: 8),
             Text(
-              'Try a different search term',
+              'Try adjusting your search criteria',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
@@ -170,18 +291,18 @@ class _SearchPageState extends State<SearchPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.search,
+              Icons.filter_list,
               size: 64,
               color: Colors.grey,
             ),
             SizedBox(height: 16),
             Text(
-              'Search for movies',
+              'Advanced Search',
               style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
             SizedBox(height: 8),
             Text(
-              'Enter a movie title to get started',
+              'Use filters to find your perfect movie',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],

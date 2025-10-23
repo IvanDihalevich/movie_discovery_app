@@ -50,10 +50,14 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
     print('Poster path: ${widget.movie.posterPath}');
     print('Backdrop path: ${widget.movie.backdropPath}');
     if (widget.movie.posterPath != null) {
-      print('Poster URL: ${AppConstants.tmdbImageBaseUrl}${AppConstants.imageSizeMedium}${widget.movie.posterPath}');
+      final posterUrl = '${AppConstants.tmdbImageBaseUrl}${AppConstants.imageSizeMedium}${widget.movie.posterPath}';
+      print('Poster URL: $posterUrl');
+      print('Poster URL length: ${posterUrl.length}');
     }
     if (widget.movie.backdropPath != null) {
-      print('Backdrop URL: ${AppConstants.tmdbImageBaseUrl}${AppConstants.imageSizeLarge}${widget.movie.backdropPath}');
+      final backdropUrl = '${AppConstants.tmdbImageBaseUrl}${AppConstants.imageSizeLarge}${widget.movie.backdropPath}';
+      print('Backdrop URL: $backdropUrl');
+      print('Backdrop URL length: ${backdropUrl.length}');
     }
   }
 
@@ -163,6 +167,9 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                   ? CachedNetworkImage(
                       imageUrl:
                           '${AppConstants.tmdbImageBaseUrl}${AppConstants.imageSizeLarge}${widget.movie.backdropPath}',
+                      httpHeaders: const {
+                        'User-Agent': 'MovieDiscoveryApp/1.0',
+                      },
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
                         color: Colors.grey[300],
@@ -174,11 +181,22 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                         print('Error loading backdrop image: $error');
                         print('URL: $url');
                         return Container(
-                          color: Colors.grey[300],
-                          child: const Icon(
-                            Icons.movie,
-                            size: 100,
-                            color: Colors.grey,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.blue[300]!,
+                                Colors.purple[300]!,
+                              ],
+                            ),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.movie,
+                              size: 100,
+                              color: Colors.white,
+                            ),
                           ),
                         );
                       },
@@ -216,6 +234,9 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                           imageUrl: widget.movie.posterPath != null
                               ? '${AppConstants.tmdbImageBaseUrl}${AppConstants.imageSizeMedium}${widget.movie.posterPath}'
                               : '',
+                          httpHeaders: const {
+                            'User-Agent': 'MovieDiscoveryApp/1.0',
+                          },
                           width: 120,
                           height: 180,
                           fit: BoxFit.cover,
@@ -233,11 +254,23 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                             return Container(
                               width: 120,
                               height: 180,
-                              color: Colors.grey[300],
-                              child: const Icon(
-                                Icons.movie,
-                                size: 50,
-                                color: Colors.grey,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Colors.blue[200]!,
+                                    Colors.purple[200]!,
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.movie,
+                                  size: 50,
+                                  color: Colors.white,
+                                ),
                               ),
                             );
                           },
