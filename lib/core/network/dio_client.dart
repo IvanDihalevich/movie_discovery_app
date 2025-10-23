@@ -53,20 +53,20 @@ class DioClient {
       ),
     );
 
-    // Cache interceptor
-    _dio.interceptors.add(
-      DioCacheInterceptor(
-        options: CacheOptions(
-          store: HiveCacheStore(),
-          policy: CachePolicy.forceCache,
-          maxStale: AppConstants.cacheExpiration,
-          hitCacheOnErrorExcept: [401, 403, 404],
-          keyBuilder: (request) {
-            return request.uri.toString();
-          },
-        ),
-      ),
-    );
+    // Cache interceptor - disabled for now to avoid permission issues
+    // _dio.interceptors.add(
+    //   DioCacheInterceptor(
+    //     options: CacheOptions(
+    //       store: HiveCacheStore('dio_cache'),
+    //       policy: CachePolicy.forceCache,
+    //       maxStale: AppConstants.cacheExpiration,
+    //       hitCacheOnErrorExcept: [401, 403, 404],
+    //       keyBuilder: (request) {
+    //         return request.uri.toString();
+    //       },
+    //     ),
+    //   ),
+    // );
 
     // Error handling interceptor
     _dio.interceptors.add(
@@ -74,21 +74,46 @@ class DioClient {
         onError: (error, handler) {
           if (error.response?.statusCode == 401) {
             // Handle unauthorized access
-            error.error = 'Unauthorized access. Please check your API key.';
+            error = DioException(
+              requestOptions: error.requestOptions,
+              error: 'Unauthorized access. Please check your API key.',
+              type: error.type,
+              response: error.response,
+            );
           } else if (error.response?.statusCode == 404) {
             // Handle not found
-            error.error = 'Resource not found.';
+            error = DioException(
+              requestOptions: error.requestOptions,
+              error: 'Resource not found.',
+              type: error.type,
+              response: error.response,
+            );
           } else if (error.response?.statusCode == 429) {
             // Handle rate limiting
-            error.error = 'Rate limit exceeded. Please try again later.';
+            error = DioException(
+              requestOptions: error.requestOptions,
+              error: 'Rate limit exceeded. Please try again later.',
+              type: error.type,
+              response: error.response,
+            );
           } else if (error.type == DioExceptionType.connectionTimeout ||
                      error.type == DioExceptionType.receiveTimeout ||
                      error.type == DioExceptionType.sendTimeout) {
             // Handle timeout
-            error.error = 'Request timeout. Please check your internet connection.';
+            error = DioException(
+              requestOptions: error.requestOptions,
+              error: 'Request timeout. Please check your internet connection.',
+              type: error.type,
+              response: error.response,
+            );
           } else if (error.type == DioExceptionType.connectionError) {
             // Handle connection error
-            error.error = 'No internet connection. Please check your network.';
+            error = DioException(
+              requestOptions: error.requestOptions,
+              error: 'No internet connection. Please check your network.',
+              type: error.type,
+              response: error.response,
+            );
           }
           handler.next(error);
         },

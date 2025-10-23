@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.9.2
+  sdk: '>=3.0.0 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -95,10 +95,9 @@ dev_dependencies:
   # Testing
   bloc_test: ^9.1.5
   mocktail: ^1.0.2
-  network_image_mock: ^2.1.1
   
   # Coverage
-  test_coverage: ^0.2.1
+  coverage: ^1.6.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -116,7 +115,6 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/animations/
-    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

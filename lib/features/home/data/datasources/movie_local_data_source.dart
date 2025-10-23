@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 import '../../domain/entities/movie.dart';
+import '../../../../core/errors/exceptions.dart';
+
 
 abstract class MovieLocalDataSource {
   Future<List<Movie>> getCachedMovies(String cacheKey);
@@ -38,7 +40,8 @@ class MovieLocalDataSourceImpl implements MovieLocalDataSource {
       
       return [];
     } catch (e) {
-      throw CacheException(message: 'Failed to get cached movies: $e');
+      // Return empty list instead of throwing exception for cache errors
+      return [];
     }
   }
 
@@ -54,7 +57,7 @@ class MovieLocalDataSourceImpl implements MovieLocalDataSource {
         'timestamp': timestamp,
       });
     } catch (e) {
-      throw CacheException(message: 'Failed to cache movies: $e');
+      // Silently fail for cache errors - don't throw exceptions
     }
   }
 
@@ -79,7 +82,8 @@ class MovieLocalDataSourceImpl implements MovieLocalDataSource {
       
       return null;
     } catch (e) {
-      throw CacheException(message: 'Failed to get cached movie details: $e');
+      // Return null instead of throwing exception for cache errors
+      return null;
     }
   }
 
@@ -94,7 +98,7 @@ class MovieLocalDataSourceImpl implements MovieLocalDataSource {
         'timestamp': timestamp,
       });
     } catch (e) {
-      throw CacheException(message: 'Failed to cache movie details: $e');
+      // Silently fail for cache errors - don't throw exceptions
     }
   }
 
@@ -107,7 +111,7 @@ class MovieLocalDataSourceImpl implements MovieLocalDataSource {
       await moviesBox.clear();
       await detailsBox.clear();
     } catch (e) {
-      throw CacheException(message: 'Failed to clear cache: $e');
+      // Silently fail for cache errors - don't throw exceptions
     }
   }
 }

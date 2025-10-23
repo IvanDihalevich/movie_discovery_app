@@ -1,7 +1,3 @@
-extensions ServerException on Exception {
-  String get message => toString().replaceFirst('Exception: ', '');
-}
-
 class ServerException implements Exception {
   final String message;
   final int? statusCode;

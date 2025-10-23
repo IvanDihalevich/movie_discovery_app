@@ -43,7 +43,9 @@ class LoadUpcomingMovies extends HomeEvent {
   List<Object?> get props => [page];
 }
 
-class RefreshMovies extends HomeEvent {}
+class RefreshMovies extends HomeEvent {
+  const RefreshMovies();
+}
 
 class LoadMoreMovies extends HomeEvent {
   final String category;

@@ -1,5 +1,7 @@
 import '../entities/movie.dart';
 import '../repositories/movie_repository.dart';
+import '../../../../core/errors/exceptions.dart';
+
 
 class SearchMovies {
   final MovieRepository repository;

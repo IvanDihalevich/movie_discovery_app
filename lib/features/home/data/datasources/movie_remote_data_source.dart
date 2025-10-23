@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../domain/entities/movie.dart';
+import '../../../../core/errors/exceptions.dart';
+
 
 abstract class MovieRemoteDataSource {
   Future<List<Movie>> getPopularMovies({int page = 1});
