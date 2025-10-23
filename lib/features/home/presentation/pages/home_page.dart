@@ -20,6 +20,9 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     context.read<HomeBloc>().add(const LoadPopularMovies(page: 1));
+    context.read<HomeBloc>().add(const LoadTopRatedMovies(page: 1));
+    context.read<HomeBloc>().add(const LoadNowPlayingMovies(page: 1));
+    context.read<HomeBloc>().add(const LoadUpcomingMovies(page: 1));
     _scrollController.addListener(_onScroll);
   }
 

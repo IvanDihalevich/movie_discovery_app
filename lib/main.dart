@@ -3,8 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/home/presentation/bloc/home_bloc.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'core/constants/app_constants.dart';
+import 'core/dependency_injection/injection.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize dependencies
+  await initializeDependencies();
+  
   runApp(const MovieDiscoveryApp());
 }
 
@@ -28,10 +34,7 @@ class MovieDiscoveryApp extends StatelessWidget {
         ),
       ),
       home: BlocProvider(
-        create: (context) => HomeBloc(
-          getPopularMovies: GetPopularMovies(null), // TODO: Inject repository
-          getMovieDetails: GetMovieDetails(null), // TODO: Inject repository
-        ),
+        create: (context) => getIt<HomeBloc>(),
         child: const HomePage(),
       ),
     );
