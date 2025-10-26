@@ -1,7 +1,7 @@
 class AppConstants {
   // API Configuration
   static const String tmdbBaseUrl = 'https://api.themoviedb.org/3';
-  static const String tmdbImageBaseUrl = 'https://image.tmdb.org/t/p';
+  static const String tmdbImageBaseUrl = 'https://image.tmdb.org/t/p/';
   static const String tmdbApiKey = '09f7b981df36791466730a0ee33d468e'; // Your TMDB API key
   
   // Image Sizes

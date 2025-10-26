@@ -40,14 +40,18 @@ class MovieCardWidget extends StatelessWidget {
                       child: CircularProgressIndicator(),
                     ),
                   ),
-                  errorWidget: (context, url, error) => Container(
-                    color: Colors.grey[300],
-                    child: const Icon(
-                      Icons.movie,
-                      size: 50,
-                      color: Colors.grey,
-                    ),
-                  ),
+                  errorWidget: (context, url, error) {
+                    print('Error loading poster image: $error');
+                    print('URL: $url');
+                    return Container(
+                      color: Colors.grey[300],
+                      child: const Icon(
+                        Icons.movie,
+                        size: 50,
+                        color: Colors.grey,
+                      ),
+                    );
+                  },
                 ),
               ),
             ),

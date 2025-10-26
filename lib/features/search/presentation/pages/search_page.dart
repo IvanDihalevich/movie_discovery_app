@@ -215,27 +215,31 @@ class _SearchPageState extends State<SearchPage> {
                   color: Colors.grey[300],
                   child: const Icon(Icons.movie),
                 ),
-                errorWidget: (context, url, error) => Container(
-                  width: 60,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.blue[200]!,
-                        Colors.purple[200]!,
-                      ],
+                errorWidget: (context, url, error) {
+                  print('Error loading search poster image: $error');
+                  print('URL: $url');
+                  return Container(
+                    width: 60,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.blue[200]!,
+                          Colors.purple[200]!,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.movie,
-                      color: Colors.white,
+                    child: const Center(
+                      child: Icon(
+                        Icons.movie,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
             title: Text(

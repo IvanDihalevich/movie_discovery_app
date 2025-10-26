@@ -111,7 +111,6 @@ class MovieRemoteDataSourceImpl implements MovieRemoteDataSource {
   Future<List<Movie>> searchMovies(String query, {int page = 1, int? year, double? rating, List<int>? genres}) async {
     try {
       final queryParams = <String, dynamic>{
-        'query': query,
         'page': page,
       };
 
@@ -126,13 +125,31 @@ class MovieRemoteDataSourceImpl implements MovieRemoteDataSource {
         queryParams['with_genres'] = genres.join(',');
       }
 
-      final response = await dio.get('/search/movie', queryParameters: queryParams);
+      // If we have a search query, use search endpoint
+      if (query.isNotEmpty && query != 'movie') {
+        queryParams['query'] = query;
+        print('Searching movies with query: $query, filters: $queryParams');
+        final response = await dio.get('/search/movie', queryParameters: queryParams);
 
-      if (response.statusCode == 200) {
-        final List<dynamic> moviesJson = response.data['results'];
-        return moviesJson.map((json) => Movie.fromJson(json)).toList();
+        if (response.statusCode == 200) {
+          final List<dynamic> moviesJson = response.data['results'];
+          print('Found ${moviesJson.length} movies via search');
+          return moviesJson.map((json) => Movie.fromJson(json)).toList();
+        } else {
+          throw ServerException(message: 'Failed to search movies');
+        }
       } else {
-        throw ServerException(message: 'Failed to search movies');
+        // For genre-only or filter-only searches, use discover endpoint
+        print('Discovering movies with filters: $queryParams');
+        final response = await dio.get('/discover/movie', queryParameters: queryParams);
+
+        if (response.statusCode == 200) {
+          final List<dynamic> moviesJson = response.data['results'];
+          print('Found ${moviesJson.length} movies via discover');
+          return moviesJson.map((json) => Movie.fromJson(json)).toList();
+        } else {
+          throw ServerException(message: 'Failed to discover movies');
+        }
       }
     } on DioException catch (e) {
       throw _handleDioException(e);

@@ -55,6 +55,32 @@ class _AdvancedSearchPageState extends State<AdvancedSearchPage> {
   }
 
   Future<void> _performSearch() async {
+    // Validate inputs
+    final yearText = _yearController.text.trim();
+    final ratingText = _ratingController.text.trim();
+    
+    // Validate year
+    if (yearText.isNotEmpty) {
+      final year = int.tryParse(yearText);
+      if (year == null || year < 1900 || year > DateTime.now().year + 5) {
+        setState(() {
+          errorMessage = 'Please enter a valid year (1900-${DateTime.now().year + 5})';
+        });
+        return;
+      }
+    }
+    
+    // Validate rating
+    if (ratingText.isNotEmpty) {
+      final rating = double.tryParse(ratingText);
+      if (rating == null || rating < 0 || rating > 10) {
+        setState(() {
+          errorMessage = 'Please enter a valid rating (0-10)';
+        });
+        return;
+      }
+    }
+
     // Allow search even with empty query for genre-only searches
     final query = _searchController.text.trim().isNotEmpty 
         ? _searchController.text.trim() 
@@ -69,8 +95,8 @@ class _AdvancedSearchPageState extends State<AdvancedSearchPage> {
       final remoteDataSource = getIt<MovieRemoteDataSourceImpl>();
       final results = await remoteDataSource.searchMovies(
         query,
-        year: _yearController.text.trim().isNotEmpty ? int.tryParse(_yearController.text.trim()) : null,
-        rating: _ratingController.text.trim().isNotEmpty ? double.tryParse(_ratingController.text.trim()) : null,
+        year: yearText.isNotEmpty ? int.parse(yearText) : null,
+        rating: ratingText.isNotEmpty ? double.parse(ratingText) : null,
         genres: selectedGenres.isNotEmpty ? selectedGenres.map((g) => genres[g]!).toList() : null,
       );
       
@@ -101,6 +127,17 @@ class _AdvancedSearchPageState extends State<AdvancedSearchPage> {
       } else {
         selectedGenres.add(genre);
       }
+    });
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _searchController.clear();
+      _yearController.clear();
+      _ratingController.clear();
+      selectedGenres.clear();
+      searchResults.clear();
+      errorMessage = null;
     });
   }
 
@@ -144,11 +181,11 @@ class _AdvancedSearchPageState extends State<AdvancedSearchPage> {
                     Expanded(
                       child: TextField(
                         controller: _yearController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Year (optional)',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.calendar_today),
-                          helperText: 'e.g., 2023',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.calendar_today),
+                          helperText: 'e.g., 2023 (1900-${DateTime.now().year + 5})',
                         ),
                         keyboardType: TextInputType.number,
                       ),
@@ -161,7 +198,7 @@ class _AdvancedSearchPageState extends State<AdvancedSearchPage> {
                           hintText: 'Min rating (optional)',
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.star),
-                          helperText: '1-10',
+                          helperText: '0-10 (shows movies with rating >= this value)',
                         ),
                         keyboardType: TextInputType.number,
                       ),
@@ -196,23 +233,37 @@ class _AdvancedSearchPageState extends State<AdvancedSearchPage> {
                 
                 const SizedBox(height: 16),
                 
-                // Search button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: isLoading ? null : _performSearch,
-                    icon: isLoading 
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.search),
-                    label: Text(isLoading ? 'Searching...' : 'Search Movies'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                // Search and Clear buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: isLoading ? null : _performSearch,
+                        icon: isLoading 
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.search),
+                        label: Text(isLoading ? 'Searching...' : 'Search Movies'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: isLoading ? null : _clearFilters,
+                      icon: const Icon(Icons.clear),
+                      label: const Text('Clear'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                        backgroundColor: Colors.grey[600],
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -336,27 +387,31 @@ class _AdvancedSearchPageState extends State<AdvancedSearchPage> {
                   color: Colors.grey[300],
                   child: const Icon(Icons.movie),
                 ),
-                errorWidget: (context, url, error) => Container(
-                  width: 60,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.blue[200]!,
-                        Colors.purple[200]!,
-                      ],
+                errorWidget: (context, url, error) {
+                  print('Error loading advanced search poster image: $error');
+                  print('URL: $url');
+                  return Container(
+                    width: 60,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.blue[200]!,
+                          Colors.purple[200]!,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.movie,
-                      color: Colors.white,
+                    child: const Center(
+                      child: Icon(
+                        Icons.movie,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
             title: Text(
